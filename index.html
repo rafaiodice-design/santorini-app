@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Santorini" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>Santorini · Produção</title>
+  <style>
+    :root {
+      --bg: #111;
+      --bg2: #1c1c1e;
+      --bg3: #2c2c2e;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f5f5f5;
+      --text2: #a0a0a0;
+      --text3: #666;
+      --accent: #e8c96a;
+      --accent-bg: rgba(232,201,106,0.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overscroll-behavior: none; }
+
+    /* ── HEADER ── */
+    .header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 0.5px solid var(--border); padding: env(safe-area-inset-top) 16px 0; }
+    .header-inner { display: flex; align-items: center; gap: 10px; height: 52px; }
+    .back-btn { display: none; width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--bg3); color: var(--text); font-size: 18px; cursor: pointer; align-items: center; justify-content: center; }
+    .back-btn.visible { display: flex; }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .header-sub { font-size: 13px; color: var(--text2); margin-left: auto; }
+
+    /* ── PAGES ── */
+    .page { display: none; flex-direction: column; min-height: calc(100vh - 52px); padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+    .page.active { display: flex; }
+
+    /* ── HOME ── */
+    .home-logo { text-align: center; padding: 32px 0 24px; }
+    .home-logo .brand { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+    .home-logo .tagline { font-size: 13px; color: var(--text2); margin-top: 4px; }
+    .section-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 8px; }
+    .recipe-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; margin-bottom: 8px; }
+    .recipe-card:active { background: var(--bg3); }
+    .recipe-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--accent-bg); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .recipe-info { flex: 1; }
+    .recipe-name { font-size: 15px; font-weight: 500; }
+    .recipe-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .recipe-arrow { color: var(--text3); font-size: 18px; }
+
+    /* ── CALCULADORA ── */
+    .calc-page { gap: 0; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); }
+    .seg-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 20px 16px 8px; }
+    .pao-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 0.5px solid var(--border); background: var(--bg); }
+    .pao-row:last-child { border-bottom: none; }
+    .pao-info { flex: 1; }
+    .pao-name { font-size: 14px; color: var(--text); }
+    .pao-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .qty-input-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    .qty-input { width: 80px; padding: 6px 10px; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-weight: 500; text-align: right; outline: none; -moz-appearance: textfield; }
+    .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .qty-input:focus { border-color: var(--accent); }
+    .qty-pesadas { font-size: 10px; color: var(--text3); text-align: right; min-height: 14px; }
+
+    /* ── RESULT FOOTER ── */
+    .result-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 0.5px solid var(--border2); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); z-index: 10; }
+    .result-footer.hidden { display: none; }
+    .footer-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .footer-total { font-size: 12px; color: var(--text2); }
+    .footer-amassadas { font-size: 12px; color: var(--accent); font-weight: 500; }
+    .footer-btn { width: 100%; padding: 12px; background: var(--accent); color: #111; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius); cursor: pointer; }
+    .footer-btn:active { opacity: 0.85; }
+
+    /* ── RESULTADO PÁGINA ── */
+    .result-page { gap: 0; }
+    .res-header { padding: 20px 16px 4px; }
+    .res-header h2 { font-size: 20px; font-weight: 700; }
+    .res-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+    .amassadas-card { margin: 16px 16px 0; background: var(--accent-bg); border: 0.5px solid rgba(232,201,106,0.3); border-radius: var(--radius); padding: 16px; }
+    .amassadas-num { font-size: 36px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .amassadas-label { font-size: 13px; color: var(--text2); margin-top: 4px; }
+    .amassadas-detail { font-size: 12px; color: var(--text3); margin-top: 6px; }
+    .ing-list { margin: 16px 16px 0; background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; }
+    .ing-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--border); }
+    .ing-item:last-child { border-bottom: none; }
+    .ing-name-r { font-size: 14px; color: var(--text2); }
+    .ing-val-r { font-size: 15px; font-weight: 500; color: var(--text); }
+    .res-actions { padding: 20px 16px; display: flex; gap: 10px; }
+    .btn-secondary { flex: 1; padding: 12px; background: var(--bg3); color: var(--text); font-size: 14px; font-weight: 500; border: none; border-radius: var(--radius); cursor: pointer; }
+    .btn-secondary:active { opacity: 0.8; }
+    .btn-primary { flex: 1; padding: 12px; background: var(--accent); color: #111; font-size: 14px; font-weight: 600; border: none; border-radius: var(--radius); cursor: pointer; }
+    .btn-primary:active { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <button class="back-btn" id="backBtn" onclick="goBack()">‹</button>
+    <span class="header-title" id="headerTitle">Santorini</span>
+    <span class="header-sub" id="headerSub"></span>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="home-logo">
+    <div class="brand">🥐 Santorini</div>
+    <div class="tagline">Calculadora de produção</div>
+  </div>
+  <div class="section-label">Massas disponíveis</div>
+  <div class="recipe-card" onclick="openRecipe('amarela')">
+    <div class="recipe-icon">🟡</div>
+    <div class="recipe-info">
+      <div class="recipe-name">Massa Amarela</div>
+      <div class="recipe-desc">Brioche, cachorro quente, suíço e mais</div>
+    </div>
+    <div class="recipe-arrow">›</div>
+  </div>
+</div>
+
+<!-- CALCULADORA -->
+<div class="page calc-page" id="page-calc">
+  <div id="calcContent"></div>
+  <div class="result-footer" id="resultFooter">
+    <div class="footer-row">
+      <span class="footer-total" id="footerTotal">Total: —</span>
+    </div>
+    <button class="footer-btn" onclick="goResult()">Ver ingredientes →</button>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="page result-page" id="page-result">
+  <div class="res-header">
+    <h2>Ingredientes</h2>
+    <p id="resDesc"></p>
+  </div>
+
+  <div class="ing-list" id="resList"></div>
+  <div class="res-actions">
+    <button class="btn-secondary" onclick="goBack()">← Ajustar</button>
+    <button class="btn-primary" onclick="resetAndHome()">Nova produção</button>
+  </div>
+</div>
+
+<script>
+const RECEITAS = {
+  amarela: {
+    nome: 'Massa Amarela',
+    base: { farinha: 5000, margarina: 500, ovos: 30, sal: 50, acucar: 1000, fermento: 130, gelo: 500 },
+    ovosPeso: 60,
+    grupos: [
+      {
+        label: 'Pães — 30 unidades por pesada',
+        unidades: 30,
+        paes: [
+          { id: 'mini-cachorro', nome: 'Mini Cachorro Quente', peso: 1100 },
+          { id: 'cachorro', nome: 'Cachorro Quente', peso: 1800 },
+          { id: 'careca', nome: 'Careca', peso: 1800 },
+          { id: 'mini-suico-hotel', nome: 'Mini Suíço Hotel', peso: 700 },
+          { id: 'mini-suico', nome: 'Mini Suíço', peso: 1100 },
+          { id: 'suico', nome: 'Suíço', peso: 1800 },
+          { id: 'suico-especial', nome: 'Suíço Especial', peso: 1900 },
+          { id: 'hamburguer', nome: 'Pão de Hambúrguer', peso: 1800 },
+          { id: 'hamburguer-medio', nome: 'Hambúrguer Médio', peso: 1600 },
+          { id: 'mini-hamburguer', nome: 'Mini Hambúrguer', peso: 900 },
+          { id: 'pao-forma', nome: 'Pão de Forma', peso: 550 },
+          { id: 'broas', nome: 'Broas Grandes', peso: 400 },
+          { id: 'colegial', nome: 'Colegial', peso: 1800 },
+          { id: 'mini-colegial', nome: 'Mini Colegial', peso: 500 },
+          { id: 'trancinha', nome: 'Trancinha', peso: 500 },
+        ]
+      },
+      {
+        label: 'Pães — 60 unidades por pesada',
+        unidades: 60,
+        paes: [
+          { id: 'brioche', nome: 'Brioche', peso: 1100 },
+          { id: 'brioche-mercados', nome: 'Brioche Mercados', peso: 1300 },
+          { id: 'bisnaguinha', nome: 'Bisnaguinha', peso: 600 },
+          { id: 'caracol', nome: 'Caracol', peso: 500 },
+          { id: 'sonho', nome: 'Sonho', peso: 600 },
+          { id: 'donuts', nome: 'Donuts / Rosquinha', peso: 700 },
+        ]
+      },
+      {
+        label: 'Pão a Metro (manual)',
+        unidades: 1,
+        paes: [
+          { id: 'metro', nome: 'Pão a Metro', peso: 840, manual: true, metaExtra: '840g por pão · manual' }
+        ]
+      }
+    ]
+  }
+};
+
+let currentRecipe = null;
+let qtds = {};
+let history = ['home'];
+
+function fmt(g) {
+  if (g >= 1000) return (g / 1000).toFixed(2).replace('.', ',') + ' kg';
+  return Math.round(g) + ' g';
+}
+
+function calcMassa(recipe) {
+  return Object.values(qtds).reduce((a, b) => a + b, 0);
+}
+
+function setQty(id, val, pesoUnit) {
+  const n = Math.max(0, parseInt(val) || 0);
+  qtds[id] = n * pesoUnit;
+  const pesadasEl = document.getElementById('p-' + id);
+  if (pesadasEl) {
+    pesadasEl.textContent = n > 0 ? (n * pesoUnit / 1000).toFixed(2).replace('.', ',') + ' kg' : '';
+  }
+  updateFooter();
+}
+
+function calcIngredientes(recipe, totalMassa) {
+  const b = recipe.base;
+  const baseMassa = b.farinha + b.margarina + (b.ovos * recipe.ovosPeso) + b.sal + b.acucar + b.fermento + b.gelo;
+  const fator = totalMassa / baseMassa;
+  return {
+    'Farinha': fmt(b.farinha * fator),
+    'Margarina': fmt(b.margarina * fator),
+    'Ovos': Math.ceil(b.ovos * fator) + ' un',
+    'Sal': fmt(b.sal * fator),
+    'Açúcar': fmt(b.acucar * fator),
+    'Fermento': fmt(b.fermento * fator),
+    'Gelo': fmt(b.gelo * fator),
+    _fator: fator,
+    _baseMassa: baseMassa
+  };
+}
+
+function openRecipe(id) {
+  currentRecipe = RECEITAS[id];
+  qtds = {};
+  currentRecipe.grupos.forEach(g => g.paes.forEach(p => { qtds[p.id] = 0; }));
+  renderCalc();
+  navigate('calc');
+}
+
+function renderCalc() {
+  const r = currentRecipe;
+  let html = '';
+  r.grupos.forEach(g => {
+    html += `<div class="seg-label">${g.label}</div>`;
+    g.paes.forEach(p => {
+      const pesoUnit = p.peso / (g.unidades || 1);
+      const meta = p.metaExtra || `${pesoUnit.toFixed(0)}g por unidade`;
+      html += `
+        <div class="pao-row">
+          <div class="pao-info">
+            <div class="pao-name">${p.nome}</div>
+            <div class="pao-meta">${meta}</div>
+          </div>
+          <div class="qty-input-wrap">
+            <input class="qty-input" type="number" min="0" inputmode="numeric" id="v-${p.id}" value="" placeholder="0"
+              oninput="setQty('${p.id}', this.value, ${pesoUnit})" />
+            <div class="qty-pesadas" id="p-${p.id}"></div>
+          </div>
+        </div>`;
+    });
+  });
+  document.getElementById('calcContent').innerHTML = html;
+  updateFooter();
+}
+
+
+function updateFooter() {
+  const total = calcMassa(currentRecipe);
+  const footer = document.getElementById('resultFooter');
+  if (total === 0) {
+    document.getElementById('footerTotal').textContent = 'Selecione os pães';
+    footer.querySelector('.footer-btn').disabled = true;
+    footer.querySelector('.footer-btn').style.opacity = '0.4';
+    return;
+  }
+  footer.querySelector('.footer-btn').disabled = false;
+  footer.querySelector('.footer-btn').style.opacity = '1';
+  document.getElementById('footerTotal').textContent = 'Total: ' + fmt(total);
+}
+
+function goResult() {
+  const total = calcMassa(currentRecipe);
+  if (total === 0) return;
+  const ing = calcIngredientes(currentRecipe, total);
+
+  document.getElementById('resDesc').textContent = currentRecipe.nome + ' · ' + fmt(total) + ' de massa';
+
+  const keys = ['Farinha', 'Margarina', 'Ovos', 'Sal', 'Açúcar', 'Fermento', 'Gelo'];
+  let listHtml = '';
+  keys.forEach(k => {
+    listHtml += `<div class="ing-item"><span class="ing-name-r">${k}</span><span class="ing-val-r">${ing[k]}</span></div>`;
+  });
+  document.getElementById('resList').innerHTML = listHtml;
+
+  navigate('result');
+}
+
+function resetAndHome() {
+  currentRecipe = null;
+  qtds = {};
+  navigate('home');
+}
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  history.push(page);
+
+  const backBtn = document.getElementById('backBtn');
+  const titleEl = document.getElementById('headerTitle');
+  const subEl = document.getElementById('headerSub');
+
+  if (page === 'home') {
+    backBtn.classList.remove('visible');
+    titleEl.textContent = 'Santorini';
+    subEl.textContent = '';
+    history = ['home'];
+  } else if (page === 'calc') {
+    backBtn.classList.add('visible');
+    titleEl.textContent = currentRecipe.nome;
+    subEl.textContent = '';
+  } else if (page === 'result') {
+    backBtn.classList.add('visible');
+    titleEl.textContent = 'Resultado';
+    subEl.textContent = '';
+  }
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  history.pop();
+  const prev = history[history.length - 1] || 'home';
+  history.pop();
+  navigate(prev);
+  if (prev === 'calc') renderCalc();
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
