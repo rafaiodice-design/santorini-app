@@ -78,7 +78,12 @@
 
     /* ── RESULTADO PÁGINA ── */
     .result-page { gap: 0; }
-    .res-header { padding: 20px 16px 4px; }
+    .adicionais-card { margin: 16px 16px 0; background: rgba(255,160,50,0.08); border: 0.5px solid rgba(255,160,50,0.3); border-radius: var(--radius); overflow: hidden; }
+    .adicionais-title { padding: 12px 16px 8px; font-size: 12px; font-weight: 600; color: rgba(255,160,50,0.9); text-transform: uppercase; letter-spacing: 0.06em; }
+    .adicionais-sub { padding: 0 16px 10px; font-size: 11px; color: var(--text3); }
+    .add-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 0.5px solid rgba(255,160,50,0.15); }
+    .add-name { font-size: 14px; color: var(--text2); }
+    .add-val { font-size: 15px; font-weight: 500; color: var(--text); }
     .res-header h2 { font-size: 20px; font-weight: 700; }
     .res-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
     .amassadas-card { margin: 16px 16px 0; background: var(--accent-bg); border: 0.5px solid rgba(232,201,106,0.3); border-radius: var(--radius); padding: 16px; }
@@ -143,6 +148,13 @@
   </div>
 
   <div class="ing-list" id="resList"></div>
+  <div id="adicionaisCard" style="display:none">
+    <div class="adicionais-card">
+      <div class="adicionais-title">🍫 Adicionais — Brioche Australiano</div>
+      <div class="adicionais-sub" id="adicionaisSub"></div>
+      <div id="adicionaisList"></div>
+    </div>
+  </div>
   <div class="res-actions">
     <button class="btn-secondary" onclick="goBack()">← Ajustar</button>
     <button class="btn-primary" onclick="resetAndHome()">Nova produção</button>
@@ -183,6 +195,8 @@ const RECEITAS = {
         paes: [
           { id: 'brioche', nome: 'Brioche', peso: 1100 },
           { id: 'brioche-mercados', nome: 'Brioche Mercados', peso: 1300 },
+          { id: 'brioche-australiano', nome: 'Brioche Australiano', peso: 1100, australiano: true },
+          { id: 'brioche-australiano-mercados', nome: 'Brioche Australiano Mercados', peso: 1300, australiano: true },
           { id: 'bisnaguinha', nome: 'Bisnaguinha', peso: 600 },
           { id: 'caracol', nome: 'Caracol', peso: 500 },
           { id: 'sonho', nome: 'Sonho', peso: 600 },
@@ -302,6 +316,26 @@ function goResult() {
     listHtml += `<div class="ing-item"><span class="ing-name-r">${k}</span><span class="ing-val-r">${ing[k]}</span></div>`;
   });
   document.getElementById('resList').innerHTML = listHtml;
+
+  // Adicionais australiano
+  // Receita base: 1300g massa → 80g chocolate, 2 tampas essência mel, 30g açúcar mascavo
+  const ADIC_BASE_MASSA = 1300;
+  const massaAustraliano = (qtds['brioche-australiano'] || 0) + (qtds['brioche-australiano-mercados'] || 0);
+  const adicionaisCard = document.getElementById('adicionaisCard');
+  if (massaAustraliano > 0) {
+    const fatorAdic = massaAustraliano / ADIC_BASE_MASSA;
+    const chocolate = fatorAdic * 80;
+    const acucarMascavo = fatorAdic * 30;
+    const tampas = fatorAdic * 2;
+    document.getElementById('adicionaisSub').textContent = fmt(massaAustraliano) + ' de massa australiana';
+    document.getElementById('adicionaisList').innerHTML = `
+      <div class="add-item"><span class="add-name">Chocolate 50%</span><span class="add-val">${fmt(chocolate)}</span></div>
+      <div class="add-item"><span class="add-name">Essência de Mel</span><span class="add-val">${tampas.toFixed(1).replace('.', ',')} tampas</span></div>
+      <div class="add-item"><span class="add-name">Açúcar Mascavo</span><span class="add-val">${fmt(acucarMascavo)}</span></div>`;
+    adicionaisCard.style.display = 'block';
+  } else {
+    adicionaisCard.style.display = 'none';
+  }
 
   navigate('result');
 }
